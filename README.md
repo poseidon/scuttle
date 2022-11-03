@@ -8,13 +8,11 @@
 * Drain and/or delete (de-register) a Kubernetes node
 * Evict Pods left by Kubelet's GracefulNodeShutdown
 
-`scuttle` compliments Kubelet's [GracefulNodeShutdown](https://kubernetes.io/docs/concepts/architecture/nodes/#graceful-node-shutdown) feature, which only handles a part of gracefully stopping the Kubelet. See the [blog post](https://www.psdn.io/posts/kubelet-graceful-shutdown/) to learn more.
+`scuttle` compliments Kubelet's [GracefulNodeShutdown](https://kubernetes.io/docs/concepts/architecture/nodes/#graceful-node-shutdown) feature, which only handles a part of gracefully stopping the Kubelet. See the [blog post](https://www.psdn.io/posts/kubelet-graceful-shutdown/) to learn more. In effect, `scuttle` is just a Go implementation of the bash scripts shown in the posts.
 
 ## Usage
 
 `scuttle` must be run in a systemd unit that is designed to stop before shutdown. Systemd shutdown can be subtle. Read [systemd Shutdown Units](https://www.psdn.io/posts/systemd-shutdown-unit/) and [Kubelet Graceful Shutdown](https://www.psdn.io/posts/kubelet-graceful-shutdown/) for background.
-
-In effect, `scuttle` is just a Go implementation of the bash scripts shown in the posts.
 
 ```systemd
 [Unit]
