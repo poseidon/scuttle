@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"github.com/slack-go/slack"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
@@ -28,6 +29,8 @@ const (
 // Config configures a Scuttle
 type Config struct {
 	Logger         *logrus.Logger
+	Channel        string
+	Token          string
 	Webhook        string
 	Platform       string
 	ShouldUncordon bool
@@ -42,6 +45,8 @@ type Scuttle struct {
 	log        *logrus.Logger
 	client     *http.Client
 	kubeClient kubernetes.Interface
+	slack      *slack.Client
+	lastThread string
 }
 
 // New creates a new Scuttle.
@@ -60,7 +65,7 @@ func New(config *Config) (*Scuttle, error) {
 		return nil, fmt.Errorf("scuttle: error creating Kubernetes client: %v", err)
 	}
 
-	return &Scuttle{
+	w := &Scuttle{
 		hostname: hostname,
 		config:   config,
 		log:      config.Logger,
@@ -68,7 +73,12 @@ func New(config *Config) (*Scuttle, error) {
 			Timeout: 2 * time.Second,
 		},
 		kubeClient: kubeClient,
-	}, nil
+	}
+	if config.Token != "" {
+		w.slack = slack.New(config.Token)
+	}
+
+	return w, nil
 }
 
 // Run runs the spot termination watch loop.
@@ -95,12 +105,12 @@ func (w *Scuttle) Run(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 			w.log.WithFields(fields).Info("scuttle: stopping...")
-			w.notifySlack(Shutdown, w.hostname)
+			w.lastThread = w.notifySlack(Shutdown, w.hostname, "")
 			return w.stop(stopCtx)
 		case <-ticker.C:
 			w.log.WithFields(fields).Debug("scuttle: tick...")
 			if w.pendingShutdown(ctx) {
-				w.notifySlack(TermNotice, w.hostname)
+				w.lastThread = w.notifySlack(TermNotice, w.hostname, "")
 				return w.stop(stopCtx)
 			}
 		}
@@ -115,7 +125,7 @@ func (w *Scuttle) start(ctx context.Context) error {
 
 	if w.config.ShouldUncordon {
 		w.log.WithFields(fields).Info("scuttle: uncordon node")
-		w.notifySlack(Uncordon, w.hostname)
+		w.notifySlack(Uncordon, w.hostname, w.lastThread)
 		drainer := drain.New(&drain.Config{
 			Client: w.kubeClient,
 			Logger: w.log,
@@ -136,7 +146,7 @@ func (w *Scuttle) stop(ctx context.Context) error {
 	// optionally drain to evict pods on the node
 	if w.config.ShouldDrain {
 		w.log.WithFields(fields).Info("scuttle: draining node")
-		w.notifySlack(Drain, w.hostname)
+		w.notifySlack(Drain, w.hostname, w.lastThread)
 		drainer := drain.New(&drain.Config{
 			Client: w.kubeClient,
 			Logger: w.log,
@@ -153,7 +163,7 @@ func (w *Scuttle) stop(ctx context.Context) error {
 	// optionally delete the node from the cluster
 	if w.config.ShouldDelete {
 		w.log.WithFields(fields).Info("scuttle: deleting node")
-		w.notifySlack(Delete, w.hostname)
+		w.notifySlack(Delete, w.hostname, w.lastThread)
 		err := w.kubeClient.CoreV1().Nodes().Delete(ctx, w.hostname, v1.DeleteOptions{})
 		// best-effort, we need to continue even on error
 		if err != nil {

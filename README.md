@@ -89,16 +89,18 @@ systemd:
 
 Configure via flags.
 
-| flag       | description  | default      |
-|------------|--------------|--------------|
-| -platform  | Platform to poll for termination notices | none |
-| -webhook   | Slack Webhook URL      | ""   |
-| -uncordon  | Uncordon node on start | true |
-| -drain     | Drain node on stop     | true |
-| -delete    | Delete node on stop    | true |
-| -log-level | Logger level | info |
-| -version   | Show version | NA   |
-| -help      | Show help    | NA   |
+| flag        | description  | default      |
+|-------------|--------------|--------------|
+| -platform   | Platform to poll for termination notices | none |
+| -channel-id | Slack Channel ID       | ""   |
+| -token      | Slack Bot Token        | ""   |
+| -webhook    | Slack Webhook URL      | ""   |
+| -uncordon   | Uncordon node on start | true |
+| -drain      | Drain node on stop     | true |
+| -delete     | Delete node on stop    | true |
+| -log-level  | Logger level | info |
+| -version    | Show version | NA   |
+| -help       | Show help    | NA   |
 
 Other values are set via environment variables.
 
@@ -113,6 +115,30 @@ Other values are set via environment variables.
 
 * [AWS Spot Termination Notifications](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-instance-termination-notices.html)
 * [Azure Spot Termination Notifications](https://learn.microsoft.com/en-us/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification#get-terminate-notifications)
+
+### Slack
+
+`scuttle` integrates with Slack to post shutdown lifecycle events. Stay informed about spot terminations, shutdowns, drains, deletions.
+
+* Create a [Slack App](https://api.slack.com/apps)
+
+A token mode can post messages, thread replies, and add reactions.
+
+* Grant bot token scopes `chat:write` and `reactions:write` to a channel via "OAuth & Permissions"
+* Get the bot token
+* Invite the app to a channel (`/invite @mybot`) and note the Channel ID
+
+```
+scuttle -channel-id C0FAKEFAKE -token bot-token
+```
+
+<img src="https://storage.googleapis.com/poseidon/scuttle-slack.png">
+
+A webhook mode is available if you only have a Slack Webhook URL. However, it cannot thread replies or add reactions.
+
+```
+scuttle -webhook https://hooks.slack.com/...
+```
 
 ## Development
 

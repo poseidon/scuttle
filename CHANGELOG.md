@@ -4,8 +4,11 @@ Notable changes between versions.
 
 ## Latest
 
-* Add Slack notifications of node lifecycle events
-  * Add `-webhook` flag to set the WebhookURL
+* Add Slack threading and reactions ([#7](https://github.com/poseidon/scuttle/pull/7))
+  * Add `-channel-id` flag to set a channel
+  * Add `-token` flag to set a Slack token
+* Add Slack notifications for lifecycle events ([#6](https://github.com/poseidon/scuttle/pull/6))
+  * Add `-webhook` flag for basic Slack notifications
 
 ## v0.1.0
 

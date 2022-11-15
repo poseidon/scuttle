@@ -28,6 +28,8 @@ var (
 
 func main() {
 	flags := struct {
+		channel  string
+		token    string
 		webhook  string
 		platform string
 		uncordon bool
@@ -38,12 +40,17 @@ func main() {
 		help     bool
 	}{}
 
-	flag.StringVar(&flags.webhook, "webhook", "", "Slack Webhook URL (e.g. https://hooks.slack.com...)")
 	flag.StringVar(&flags.platform, "platform", "none", "Set platform (none, aws, azure) to poll termination notices")
 	flag.BoolVar(&flags.uncordon, "uncordon", true, "Enabling uncordoning node on start")
 	flag.BoolVar(&flags.drain, "drain", true, "Enabling draining node on stop")
 	flag.BoolVar(&flags.delete, "delete", true, "Enable deleting node on stop")
 	flag.StringVar(&flags.logLevel, "log-level", "info", "Set the logging level")
+
+	// Slack
+	flag.StringVar(&flags.channel, "channel-id", "", "Slack Channel ID (e.g. C0FAKEFAKE)")
+	flag.StringVar(&flags.token, "token", "", "Slack App token")
+	flag.StringVar(&flags.webhook, "webhook", "", "Slack Webhook URL (e.g. https://hooks.slack.com...)")
+
 	// subcommands
 	flag.BoolVar(&flags.version, "version", false, "Print version and exit")
 	flag.BoolVar(&flags.help, "help", false, "Print usage and exit")
@@ -87,6 +94,8 @@ func main() {
 	// Termination watcher
 	scuttle, err := sctl.New(&sctl.Config{
 		Logger:         log,
+		Channel:        flags.channel,
+		Token:          flags.token,
 		Webhook:        flags.webhook,
 		Platform:       flags.platform,
 		ShouldUncordon: flags.uncordon,
