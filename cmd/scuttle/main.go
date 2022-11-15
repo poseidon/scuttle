@@ -28,6 +28,7 @@ var (
 
 func main() {
 	flags := struct {
+		webhook  string
 		platform string
 		uncordon bool
 		drain    bool
@@ -37,6 +38,7 @@ func main() {
 		help     bool
 	}{}
 
+	flag.StringVar(&flags.webhook, "webhook", "", "Slack Webhook URL (e.g. https://hooks.slack.com...)")
 	flag.StringVar(&flags.platform, "platform", "none", "Set platform (none, aws, azure) to poll termination notices")
 	flag.BoolVar(&flags.uncordon, "uncordon", true, "Enabling uncordoning node on start")
 	flag.BoolVar(&flags.drain, "drain", true, "Enabling draining node on stop")
@@ -85,6 +87,7 @@ func main() {
 	// Termination watcher
 	scuttle, err := sctl.New(&sctl.Config{
 		Logger:         log,
+		Webhook:        flags.webhook,
 		Platform:       flags.platform,
 		ShouldUncordon: flags.uncordon,
 		ShouldDrain:    flags.drain,

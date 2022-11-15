@@ -4,6 +4,9 @@ Notable changes between versions.
 
 ## Latest
 
+* Add Slack notifications of node lifecycle events
+  * Add `-webhook` flag to set the WebhookURL
+
 ## v0.1.0
 
 * Initial port from bash script to Go

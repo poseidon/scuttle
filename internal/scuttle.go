@@ -28,6 +28,7 @@ const (
 // Config configures a Scuttle
 type Config struct {
 	Logger         *logrus.Logger
+	Webhook        string
 	Platform       string
 	ShouldUncordon bool
 	ShouldDrain    bool
@@ -94,10 +95,12 @@ func (w *Scuttle) Run(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 			w.log.WithFields(fields).Info("scuttle: stopping...")
+			w.notifySlack(Shutdown, w.hostname)
 			return w.stop(stopCtx)
 		case <-ticker.C:
 			w.log.WithFields(fields).Debug("scuttle: tick...")
 			if w.pendingShutdown(ctx) {
+				w.notifySlack(TermNotice, w.hostname)
 				return w.stop(stopCtx)
 			}
 		}
@@ -112,6 +115,7 @@ func (w *Scuttle) start(ctx context.Context) error {
 
 	if w.config.ShouldUncordon {
 		w.log.WithFields(fields).Info("scuttle: uncordon node")
+		w.notifySlack(Uncordon, w.hostname)
 		drainer := drain.New(&drain.Config{
 			Client: w.kubeClient,
 			Logger: w.log,
@@ -132,6 +136,7 @@ func (w *Scuttle) stop(ctx context.Context) error {
 	// optionally drain to evict pods on the node
 	if w.config.ShouldDrain {
 		w.log.WithFields(fields).Info("scuttle: draining node")
+		w.notifySlack(Drain, w.hostname)
 		drainer := drain.New(&drain.Config{
 			Client: w.kubeClient,
 			Logger: w.log,
@@ -148,6 +153,7 @@ func (w *Scuttle) stop(ctx context.Context) error {
 	// optionally delete the node from the cluster
 	if w.config.ShouldDelete {
 		w.log.WithFields(fields).Info("scuttle: deleting node")
+		w.notifySlack(Delete, w.hostname)
 		err := w.kubeClient.CoreV1().Nodes().Delete(ctx, w.hostname, v1.DeleteOptions{})
 		// best-effort, we need to continue even on error
 		if err != nil {

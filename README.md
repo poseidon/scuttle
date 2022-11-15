@@ -85,6 +85,28 @@ systemd:
         WantedBy=multi-user.target
 ```
 
+### Configuration
+
+Configure via flags.
+
+| flag       | description  | default      |
+|------------|--------------|--------------|
+| -platform  | Platform to poll for termination notices | none |
+| -webhook   | Slack Webhook URL      | ""   |
+| -uncordon  | Uncordon node on start | true |
+| -drain     | Drain node on stop     | true |
+| -delete    | Delete node on stop    | true |
+| -log-level | Logger level | info |
+| -version   | Show version | NA   |
+| -help      | Show help    | NA   |
+
+Other values are set via environment variables.
+
+| variable   | description            | default   |
+|------------|------------------------|-----------|
+| KUBECONFIG | Path to Kubeconfig     | ""        |
+| HOSTNAME   | Current node name      | ""        |
+
 ### Spot Termination Notices
 
 [AWS](https://aws.amazon.com/blogs/aws/new-ec2-spot-instance-termination-notices/) and [Azure](https://learn.microsoft.com/en-us/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-terminate-notification) provide warnings via instance metadata (2 min) before spot terminations. `scuttle` can monitor platform specific instance metadata endpoints to trigger drain or delete actions before shutdown.
