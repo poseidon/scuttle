@@ -12,14 +12,8 @@ LD_FLAGS="-w -X main.version=$(VERSION)"
 all: build test vet fmt
 
 .PHONY: build
-build: bin/scuttle
-
-.PHONY: bin/scuttle
-bin/scuttle:
+build:
 	@go build -o bin/scuttle -ldflags $(LD_FLAGS) $(REPO)/cmd/scuttle
-
-run:
-	./bin/scuttle -uncordon=true -drain=true -delete=true
 
 .PHONY: test
 test:
@@ -32,6 +26,10 @@ vet:
 .PHONY: fmt
 fmt:
 	@test -z $$(go fmt ./...)
+
+.PHONY: lint
+lint:
+	@golangci-lint run ./...
 
 image: \
 	image-amd64 \
