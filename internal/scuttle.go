@@ -16,8 +16,9 @@ import (
 	"github.com/sirupsen/logrus"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	kubectl "k8s.io/kubectl/pkg/drain"
 
-	drain "github.com/poseidon/scuttle/internal/drainer"
+	cordon "github.com/poseidon/scuttle/internal/cordoner"
 )
 
 const (
@@ -112,11 +113,11 @@ func (w *Scuttle) start(ctx context.Context) error {
 
 	if w.config.ShouldUncordon {
 		w.log.WithFields(fields).Info("scuttle: uncordon node")
-		drainer := drain.New(&drain.Config{
+		cordoner := cordon.New(&cordon.Config{
 			Client: w.kubeClient,
 			Logger: w.log,
 		})
-		return drainer.Uncordon(ctx, w.hostname)
+		return cordoner.Uncordon(ctx, w.hostname)
 	}
 
 	w.log.WithFields(fields).Info("scuttle: SKIP uncordon node")
@@ -129,14 +130,33 @@ func (w *Scuttle) stop(ctx context.Context) error {
 		"hostname": w.hostname,
 	}
 
+	draino := &kubectl.Helper{
+		Client:              w.kubeClient,
+		IgnoreAllDaemonSets: true,
+		DeleteEmptyDirData:  true,
+		GracePeriodSeconds:  -1,
+		// upstream drain Helper logs to an Out and ErrOut io.Writer
+		// https://pkg.go.dev/k8s.io/kubectl@v0.25.4/pkg/drain#Helper
+		Out:    w.log.Writer(),
+		ErrOut: w.log.WriterLevel(logrus.WarnLevel),
+	}
+
+	cordoner := cordon.New(&cordon.Config{
+		Client: w.kubeClient,
+		Logger: w.log,
+	})
+
 	// optionally drain to evict pods on the node
 	if w.config.ShouldDrain {
+		w.log.WithFields(fields).Info("scuttle: cordoning node")
+		err := cordoner.Cordon(ctx, w.hostname)
+		// best-effort, we need to continue even on error
+		if err != nil {
+			w.log.WithFields(fields).Errorf("scuttle: cordon error: %v", err)
+		}
+
 		w.log.WithFields(fields).Info("scuttle: draining node")
-		drainer := drain.New(&drain.Config{
-			Client: w.kubeClient,
-			Logger: w.log,
-		})
-		err := drainer.Drain(ctx, w.hostname)
+		err = kubectl.RunNodeDrain(draino, w.hostname)
 		// best-effort, we need to continue even on error
 		if err != nil {
 			w.log.WithFields(fields).Errorf("scuttle: drain error: %v", err)
