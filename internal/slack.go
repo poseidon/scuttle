@@ -71,7 +71,6 @@ func (w *Scuttle) notifySlack(action Notification, node string, thread string) s
 		}
 
 		opts := []slack.MsgOption{
-			//slack.MsgOptionText(text, true),
 			slack.MsgOptionAttachments(attachment),
 		}
 		if thread != "" {

@@ -67,7 +67,7 @@ systemd:
           --env KUBECONFIG=/var/lib/kubelet/kubeconfig \
           -v /var/lib/kubelet:/var/lib/kubelet:ro,z \
           --stop-timeout=60 \
-          quay.io/poseidon/scuttle:261fc0f \
+          quay.io/poseidon/scuttle:v0.1.0 \
           -platform=aws
         ExecStop=/usr/bin/podman stop scuttle
         TimeoutStopSec=180
@@ -91,13 +91,14 @@ Configure via flags.
 
 | flag        | description  | default      |
 |-------------|--------------|--------------|
+| -node       | Kubernetes node name | $HOSTNAME |
 | -platform   | Platform to poll for termination notices | none |
-| -channel-id | Slack Channel ID       | ""   |
-| -token      | Slack Bot Token        | ""   |
-| -webhook    | Slack Webhook URL      | ""   |
 | -uncordon   | Uncordon node on start | true |
 | -drain      | Drain node on stop     | true |
 | -delete     | Delete node on stop    | true |
+| -channel-id | Slack Channel ID       | ""   |
+| -token      | Slack Bot Token        | ""   |
+| -webhook    | Slack Webhook URL      | ""   |
 | -log-level  | Logger level | info |
 | -version    | Show version | NA   |
 | -help       | Show help    | NA   |
@@ -177,9 +178,10 @@ INFO[0004] scuttle: stopping...                          hostname=ip-10-0-35-141
 INFO[0004] scuttle: cordoning node                       hostname=ip-10-0-35-141
 INFO[0004] drainer: cordoning node                       node=ip-10-0-35-141
 INFO[0004] scuttle: draining node                        hostname=ip-10-0-35-141
-WARN[0005] WARNING: ignoring DaemonSet-managed Pods: kube-system/cilium-gpdk8, kube-system/kube-proxy-cvwx5, monitoring/promtail-k9slg
-INFO[0005] evicting pod default/redacted
+INFO[0026] drainer: evicting pod                         node=ip-10-0-35-141 pod=redacted
+INFO[0027] drainer: evicting pod                         node=ip-10-0-35-141 pod=redacted
 ...
-INFO[0009] scuttle: deleting node                        hostname=ip-10-0-35-141
+INFO[0027] drainer: drained node                         node=ip-10-0-35-141
+INFO[0027] scuttle: deleting node                        hostname=ip-10-0-35-141
 INFO[0009] done
 ```

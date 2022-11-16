@@ -29,13 +29,15 @@ const (
 // Config configures a Scuttle
 type Config struct {
 	Logger         *logrus.Logger
-	Channel        string
-	Token          string
-	Webhook        string
+	NodeName       string
 	Platform       string
 	ShouldUncordon bool
 	ShouldDrain    bool
 	ShouldDelete   bool
+	// Slack
+	Channel string
+	Token   string
+	Webhook string
 }
 
 // Scuttle watches for termination notices and performs Kubelet teardown actions.
@@ -55,8 +57,11 @@ func New(config *Config) (*Scuttle, error) {
 		return nil, fmt.Errorf("scuttle: logger must be non-nil")
 	}
 
-	// Use HOSTNAME to identify Kubelet node
-	hostname := os.Getenv("HOSTNAME")
+	hostname := config.NodeName
+	if hostname == "" {
+		// fallback to HOSTNAME to identify Kubelet node
+		hostname = os.Getenv("HOSTNAME")
+	}
 
 	// Kubernetes client from kubeconfig or service account (in-cluster)
 	kubeconfigPath := os.Getenv("KUBECONFIG")
@@ -65,7 +70,13 @@ func New(config *Config) (*Scuttle, error) {
 		return nil, fmt.Errorf("scuttle: error creating Kubernetes client: %v", err)
 	}
 
-	w := &Scuttle{
+	// initialize Slack client if token is set
+	var slackClient *slack.Client
+	if config.Token != "" {
+		slackClient = slack.New(config.Token)
+	}
+
+	return &Scuttle{
 		hostname: hostname,
 		config:   config,
 		log:      config.Logger,
@@ -73,12 +84,8 @@ func New(config *Config) (*Scuttle, error) {
 			Timeout: 2 * time.Second,
 		},
 		kubeClient: kubeClient,
-	}
-	if config.Token != "" {
-		w.slack = slack.New(config.Token)
-	}
-
-	return w, nil
+		slack:      slackClient,
+	}, nil
 }
 
 // Run runs the spot termination watch loop.

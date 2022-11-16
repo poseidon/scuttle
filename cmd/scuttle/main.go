@@ -28,6 +28,7 @@ var (
 
 func main() {
 	flags := struct {
+		nodeName string
 		channel  string
 		token    string
 		webhook  string
@@ -40,6 +41,7 @@ func main() {
 		help     bool
 	}{}
 
+	flag.StringVar(&flags.nodeName, "node", "", "Kubernetes node name (defaults to $HOSTNAME)")
 	flag.StringVar(&flags.platform, "platform", "none", "Set platform (none, aws, azure) to poll termination notices")
 	flag.BoolVar(&flags.uncordon, "uncordon", true, "Enabling uncordoning node on start")
 	flag.BoolVar(&flags.drain, "drain", true, "Enabling draining node on stop")
@@ -91,22 +93,24 @@ func main() {
 		stop()
 	}()
 
-	// Termination watcher
+	// termination watcher
 	scuttle, err := sctl.New(&sctl.Config{
 		Logger:         log,
-		Channel:        flags.channel,
-		Token:          flags.token,
-		Webhook:        flags.webhook,
+		NodeName:       flags.nodeName,
 		Platform:       flags.platform,
 		ShouldUncordon: flags.uncordon,
 		ShouldDrain:    flags.drain,
 		ShouldDelete:   flags.delete,
+		// Slack
+		Channel: flags.channel,
+		Token:   flags.token,
+		Webhook: flags.webhook,
 	})
 	if err != nil {
 		log.Fatalf("main: scuttle New error: %v", err)
 	}
 
-	// watch for spot termination notice
+	// watch for termination
 	log.Infof("main: starting scuttle")
 	err = scuttle.Run(ctx)
 	if err != nil {

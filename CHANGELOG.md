@@ -4,6 +4,9 @@ Notable changes between versions.
 
 ## Latest
 
+* Allow the node name to be set directly
+  * Add `-node` flag to set the Kubernetes node name
+  * Default to using the `HOSTNAME` environment variable
 * Add Slack threading and reactions ([#7](https://github.com/poseidon/scuttle/pull/7))
   * Add `-channel-id` flag to set a channel
   * Add `-token` flag to set a Slack token
