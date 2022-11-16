@@ -4,7 +4,7 @@ Notable changes between versions.
 
 ## Latest
 
-* Allow the node name to be set directly
+* Allow the node name to be set directly ([#8](https://github.com/poseidon/scuttle/pull/8))
   * Add `-node` flag to set the Kubernetes node name
   * Default to using the `HOSTNAME` environment variable
 * Add Slack threading and reactions ([#7](https://github.com/poseidon/scuttle/pull/7))

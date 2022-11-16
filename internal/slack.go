@@ -25,32 +25,40 @@ const (
 	Delete     Notification = "delete"
 )
 
+func ErrorNotification(err error) Notification {
+	return Notification(err.Error())
+}
+
 // notifySlack posts a Slack message (and reaction) and returns the message
 // timestamp for threading subsequent replies.
 // - Slack client mode posts a Slack message or reply (if thread set) and
 // reaction
 // - Slack webhook mode just posts a simple message only
-func (w *Scuttle) notifySlack(action Notification, node string, thread string) string {
+func (w *Scuttle) notifySlack(action Notification, thread string) string {
 	var text, reaction, color string
 
 	switch action {
 	case Uncordon:
 		color = "good"
-		text = fmt.Sprintf(":hatched_chick: Uncordon node `%s`", node)
+		text = fmt.Sprintf(":hatched_chick: Uncordon node `%s`", w.hostname)
 	case TermNotice:
 		color = "warning"
-		text = fmt.Sprintf(":stopwatch: Detected spot termination notice for `%s`", node)
+		text = fmt.Sprintf(":stopwatch: Detected spot termination notice for `%s`", w.hostname)
 	case Shutdown:
 		color = "warning"
-		text = fmt.Sprintf(":warning: Detected shutdown of `%s`", node)
+		text = fmt.Sprintf(":warning: Detected shutdown of `%s`", w.hostname)
 	case Drain:
 		color = "warning"
-		text = fmt.Sprintf(":droplet: Draining node `%s`", node)
+		text = fmt.Sprintf(":droplet: Draining node `%s`", w.hostname)
 		reaction = "droplet"
 	case Delete:
 		color = "warning"
-		text = fmt.Sprintf(":headstone: Deleting node `%s`", node)
+		text = fmt.Sprintf(":headstone: Deleting node `%s`", w.hostname)
 		reaction = "headstone"
+	default:
+		color = "danger"
+		text = string(action)
+		reaction = "red_circle"
 	}
 
 	now := time.Now().Format(time.StampMilli)
