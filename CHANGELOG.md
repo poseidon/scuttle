@@ -4,6 +4,9 @@ Notable changes between versions.
 
 ## Latest
 
+* Change base image from alpine to fedora
+  * Add AWS CLI to allow kubeconfig's that exec `aws`
+  * The AWS CLI v2 has troublesome dynamic linking
 * Allow the node name to be set directly ([#8](https://github.com/poseidon/scuttle/pull/8))
   * Add `-node` flag to set the Kubernetes node name
   * Default to using the `HOSTNAME` environment variable
