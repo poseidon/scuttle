@@ -4,6 +4,9 @@ RUN cd src && make build
 
 FROM docker.io/fedora:37
 LABEL maintainer="Dalton Hubble <dghubble@gmail.com>"
+LABEL org.opencontainers.image.title="scuttle",
+LABEL org.opencontainers.image.source="https://github.com/poseidon/scuttle"
+LABEL org.opencontainers.image.vendor="Poseidon Labs"
 # AWS CLI v2 is an ugly pile of Python with dynamic linking to specific
 # shared objects they zip up. And the zip doesn't even have a checksum
 #
