@@ -3,7 +3,6 @@
 [![Quay](https://img.shields.io/badge/container-quay-green)](https://quay.io/repository/poseidon/scuttle)
 [![Workflow](https://github.com/poseidon/scuttle/actions/workflows/test.yaml/badge.svg)](https://github.com/poseidon/scuttle/actions/workflows/test.yaml?query=branch%3Amain)
 [![Sponsors](https://img.shields.io/github/sponsors/poseidon?logo=github)](https://github.com/sponsors/poseidon)
-[![Twitter](https://img.shields.io/badge/follow-news-1da1f2?logo=twitter)](https://twitter.com/poseidonlabs)
 [![Mastodon](https://img.shields.io/badge/follow-news-6364ff?logo=mastodon)](https://fosstodon.org/@poseidon)
 
 <img align="right" src="https://storage.googleapis.com/poseidon/scuttle.png" width="40%">
