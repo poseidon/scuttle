@@ -2,7 +2,7 @@ FROM docker.io/golang:1.20.3 AS builder
 COPY . src
 RUN cd src && make build
 
-FROM docker.io/fedora:37
+FROM docker.io/fedora:38
 LABEL maintainer="Dalton Hubble <dghubble@gmail.com>"
 LABEL org.opencontainers.image.title="scuttle",
 LABEL org.opencontainers.image.source="https://github.com/poseidon/scuttle"
