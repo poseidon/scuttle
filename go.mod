@@ -3,7 +3,7 @@ module github.com/poseidon/scuttle
 go 1.19
 
 require (
-	github.com/sirupsen/logrus v1.9.2
+	github.com/sirupsen/logrus v1.9.3
 	github.com/slack-go/slack v0.12.2
 	k8s.io/api v0.27.2
 	k8s.io/apimachinery v0.27.2
