@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/sirupsen/logrus v1.9.3
-	github.com/slack-go/slack v0.12.2
+	github.com/slack-go/slack v0.12.3
 	k8s.io/api v0.28.0
 	k8s.io/apimachinery v0.28.0
 	k8s.io/client-go v0.28.0
