@@ -7,12 +7,14 @@
 package scuttle
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/slack-go/slack"
+	"go.seankhliao.com/gchat"
 )
 
 type Notification string
@@ -29,6 +31,19 @@ func ErrorNotification(err error) Notification {
 	return Notification(err.Error())
 }
 
+// gchat
+func gchatReport(client *gchat.WebhookClient, obj string) {
+	// if strings.Contains(obj, "ERROR") {
+	// 	return fmt.Sprintf("WebhookClient: Unable to send - %s'", obj)
+	// }
+	err := client.Post(context.Background(), gchat.WebhookPayload{
+		Text: obj,
+	})
+	if err != nil {
+		fmt.Sprintf("WebhookClient: Unable to send - %s'", err)
+	}
+}
+
 // notifySlack posts a Slack message (and reaction) and returns the message
 // timestamp for threading subsequent replies.
 // - Slack client mode posts a Slack message or reply (if thread set) and
@@ -40,24 +55,24 @@ func (w *Scuttle) notifySlack(action Notification, thread string) string {
 	switch action {
 	case Uncordon:
 		color = "good"
-		text = fmt.Sprintf(":hatched_chick: Uncordon node `%s`", w.hostname)
+		text = fmt.Sprintf("🐣 Uncordon node `%s`", w.hostname)
 	case TermNotice:
 		color = "warning"
-		text = fmt.Sprintf(":stopwatch: Detected spot termination notice for `%s`", w.hostname)
+		text = fmt.Sprintf("⏱️ Detected spot termination notice for `%s`", w.hostname)
 	case Shutdown:
 		color = "warning"
-		text = fmt.Sprintf(":warning: Detected shutdown of `%s`", w.hostname)
+		text = fmt.Sprintf("⚠️ Detected shutdown of `%s`", w.hostname)
 	case Drain:
 		color = "warning"
-		text = fmt.Sprintf(":droplet: Draining node `%s`", w.hostname)
+		text = fmt.Sprintf("💧 Draining node `%s`", w.hostname)
 		reaction = "droplet"
 	case Delete:
 		color = "warning"
-		text = fmt.Sprintf(":headstone: Deleting node `%s`", w.hostname)
+		text = fmt.Sprintf("🪦 Deleting node `%s`", w.hostname)
 		reaction = "headstone"
 	default:
 		color = "danger"
-		text = string(action)
+		text = fmt.Sprintf("‼️ %s ‼️", action)
 		reaction = "red_circle"
 	}
 
@@ -70,34 +85,36 @@ func (w *Scuttle) notifySlack(action Notification, thread string) string {
 	}
 
 	// Slack App token mode (richer)
-	if w.slack != nil {
-		if reaction != "" {
-			msgRef := slack.NewRefToMessage(w.config.Channel, thread)
-			if err := w.slack.AddReaction(reaction, msgRef); err != nil {
-				w.log.Errorf("error posting Slack reaction: %v", err)
+	if w.config.Webhook == "" {
+		if w.slack != nil {
+			if reaction != "" {
+				msgRef := slack.NewRefToMessage(w.config.Channel, thread)
+				if err := w.slack.AddReaction(reaction, msgRef); err != nil {
+					w.log.Errorf("error posting Slack reaction: %v", err)
+				}
 			}
-		}
 
-		opts := []slack.MsgOption{
-			slack.MsgOptionAttachments(attachment),
-		}
-		if thread != "" {
-			opts = append(opts, slack.MsgOptionTS(thread))
-		}
+			opts := []slack.MsgOption{
+				slack.MsgOptionAttachments(attachment),
+			}
+			if thread != "" {
+				opts = append(opts, slack.MsgOptionTS(thread))
+			}
 
-		_, stamp, err := w.slack.PostMessage(
-			w.config.Channel,
-			opts...,
-		)
-		if err != nil {
-			w.log.Errorf("error posting Slack message: %v", err)
-		}
+			_, stamp, err := w.slack.PostMessage(
+				w.config.Channel,
+				opts...,
+			)
+			if err != nil {
+				w.log.Errorf("error posting Slack message: %v", err)
+			}
 
-		return stamp
+			return stamp
+		}
 	}
 
 	// Slack App Webhook mode
-	if w.config.Webhook != "" {
+	if w.config.Webhook == "slack" {
 		msg := &slack.WebhookMessage{
 			Attachments: []slack.Attachment{
 				attachment,
@@ -106,6 +123,27 @@ func (w *Scuttle) notifySlack(action Notification, thread string) string {
 		err := slack.PostWebhook(w.config.Webhook, msg)
 		if err != nil {
 			w.log.Errorf("error sending Slack Webhook: %v", err)
+		}
+	}
+
+	// Google Chat Webhook mode
+	var chat *gchat.WebhookClient
+
+	if w.config.Webhook != "" {
+		var gchatEndpoint = w.config.Webhook
+		fmt.Sprintf(w.config.Webhook)
+
+		if gchatEndpoint != "" {
+			chat = &gchat.WebhookClient{
+				//Client:   &http.Client,
+				Endpoint: gchatEndpoint,
+			}
+		}
+
+		msg := attachment.Text
+
+		if chat != nil {
+			gchatReport(chat, msg)
 		}
 	}
 
