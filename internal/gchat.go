@@ -41,11 +41,9 @@ func (w *Scuttle) notifyGchat(action Notification) string {
 		Text: msg,
 	}
 
-	if attachment != nil {
-		err := w.gchat.Post(context.Background(), *attachment)
-		if err != nil {
-			w.log.Warn("WebhookClient: Unable to send - `%s`", err)
-		}
+	err := w.gchat.Post(context.Background(), *attachment)
+	if err != nil {
+		w.log.Errorf("WebhookClient: Unable to send - %s", err)
 	}
 
 	return ""

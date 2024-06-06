@@ -97,7 +97,7 @@ Configure via flags.
 | -delete     | Delete node on stop    | true |
 | -channel-id | Slack Channel ID       | ""   |
 | -token      | Slack Bot Token        | ""   |
-| -webhook    | Slack Webhook URL      | ""   |
+| -webhook    | Slack or google Webhook URL      | ""   |
 | -log-level  | Logger level | info |
 | -version    | Show version | NA   |
 | -help       | Show help    | NA   |
@@ -138,6 +138,14 @@ A webhook mode is available if you only have a Slack Webhook URL. However, it ca
 
 ```
 scuttle -webhook https://hooks.slack.com/...
+```
+
+### Google chat
+
+Supports posting messages to Google chat spaces, using Google webhook URL. It cannot thread replies or add reactions.
+
+```
+scuttle -webhook "https://chat.googleapis.com/v1/spaces/..."
 ```
 
 ## Development
