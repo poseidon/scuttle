@@ -51,7 +51,7 @@ func main() {
 	// Slack
 	flag.StringVar(&flags.channel, "channel-id", "", "Slack Channel ID (e.g. C0FAKEFAKE)")
 	flag.StringVar(&flags.token, "token", "", "Slack App token")
-	flag.StringVar(&flags.webhook, "webhook", "", "Slack Webhook URL (e.g. https://hooks.slack.com...)")
+	flag.StringVar(&flags.webhook, "webhook", "", "Slack or Google Webhook URL (e.g. \"https://hooks.slack.com\" or \"https://chat.googleapis.com/v1/spaces/\")")
 
 	// subcommands
 	flag.BoolVar(&flags.version, "version", false, "Print version and exit")
@@ -104,6 +104,7 @@ func main() {
 		// Slack
 		Channel: flags.channel,
 		Token:   flags.token,
+		// Slack or gChat
 		Webhook: flags.webhook,
 	})
 	if err != nil {

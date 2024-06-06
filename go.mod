@@ -7,6 +7,7 @@ toolchain go1.22.2
 require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/slack-go/slack v0.13.0
+	go.seankhliao.com/gchat v0.0.0-20230625190431-824613c32ec3
 	k8s.io/api v0.30.1
 	k8s.io/apimachinery v0.30.1
 	k8s.io/client-go v0.30.1
@@ -33,7 +34,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	go.seankhliao.com/gchat v0.0.0-20230625190431-824613c32ec3 // indirect
 	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/oauth2 v0.10.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
