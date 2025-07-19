@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -59,8 +60,8 @@ func New(config *Config) (*Scuttle, error) {
 
 	hostname := config.NodeName
 	if hostname == "" {
-		// fallback to HOSTNAME to identify Kubelet node
-		hostname = os.Getenv("HOSTNAME")
+		// fallback to lowercase HOSTNAME, like Kubelet does
+		hostname = strings.ToLower(os.Getenv("HOSTNAME"))
 	}
 
 	// Kubernetes client from kubeconfig or service account (in-cluster)
