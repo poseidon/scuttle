@@ -10,6 +10,7 @@ jobs:
   go:
     uses: poseidon/.github/.github/workflows/golang-library.yaml@main
   multiarch:
-    uses: poseidon/fleetlock/.github/workflows/multiarch.yaml@main
+    #uses: poseidon/fleetlock/.github/workflows/multiarch.yaml@main
+    uses: ./.github/workflows/multiarch.yaml
     secrets:
       QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}

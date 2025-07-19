@@ -8,9 +8,11 @@ package scuttle
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -59,8 +61,8 @@ func New(config *Config) (*Scuttle, error) {
 
 	hostname := config.NodeName
 	if hostname == "" {
-		// fallback to HOSTNAME to identify Kubelet node
-		hostname = os.Getenv("HOSTNAME")
+		// fallback to lowercase HOSTNAME, like Kubelet does
+		hostname = strings.ToLower(os.Getenv("HOSTNAME"))
 	}
 
 	// Kubernetes client from kubeconfig or service account (in-cluster)
@@ -216,6 +218,21 @@ func (w *Scuttle) pendingShutdown(ctx context.Context) bool {
 		return false
 	}
 
+	if w.config.Platform == "azure" {
+		scheduledEvents := new(AzureScheduledEvents)
+		err = json.NewDecoder(resp.Body).Decode(scheduledEvents)
+		if err != nil {
+			w.log.WithFields(fields).Errorf("scuttle: error decoding Azure scheduled events: %v, %v", err, scheduledEvents)
+		}
+		if len(scheduledEvents.Events) > 0 {
+			w.log.WithFields(fields).Info("scuttle: Spot Instance interruption notice!")
+			return true
+		}
+		w.log.WithFields(fields).Debugf("scuttle: no scheduled events: %v", scheduledEvents)
+		return false
+	}
+
+	// by default, a simple 200 response code indicates an interruption notice
 	switch resp.StatusCode {
 	case 200:
 		w.log.WithFields(fields).Info("scuttle: Spot Instance interruption notice!")
@@ -224,4 +241,12 @@ func (w *Scuttle) pendingShutdown(ctx context.Context) bool {
 		w.log.WithFields(fields).Debugf("scuttle: metadata status code %d", resp.StatusCode)
 		return false
 	}
+}
+
+// Github Issue (abbreviated)
+type AzureScheduledEvents struct {
+	DocumentIncarnation int `json:"DocumentIncarnation"`
+	Events              []struct {
+		ID string `json:"EventId"`
+	} `json:"Events"`
 }
