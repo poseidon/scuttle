@@ -41,7 +41,7 @@ func main() {
 		help     bool
 	}{}
 
-	flag.StringVar(&flags.nodeName, "node", "", "Kubernetes node name (defaults to $HOSTNAME)")
+	flag.StringVar(&flags.nodeName, "node", "", "Kubernetes node name (defaults to lowercase $HOSTNAME)")
 	flag.StringVar(&flags.platform, "platform", "none", "Set platform (none, aws, azure) to poll termination notices")
 	flag.BoolVar(&flags.uncordon, "uncordon", true, "Enabling uncordoning node on start")
 	flag.BoolVar(&flags.drain, "drain", true, "Enabling draining node on stop")
