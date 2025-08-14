@@ -7,9 +7,9 @@ toolchain go1.24.6
 require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/slack-go/slack v0.17.3
-	k8s.io/api v0.33.3
-	k8s.io/apimachinery v0.33.3
-	k8s.io/client-go v0.33.3
+	k8s.io/api v0.33.4
+	k8s.io/apimachinery v0.33.4
+	k8s.io/client-go v0.33.4
 )
 
 require (
