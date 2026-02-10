@@ -2,7 +2,7 @@ module github.com/poseidon/scuttle
 
 go 1.25.0
 
-toolchain go1.25.7
+toolchain go1.26.0
 
 require (
 	github.com/sirupsen/logrus v1.9.4
