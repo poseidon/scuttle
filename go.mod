@@ -5,7 +5,7 @@ go 1.26.0
 toolchain go1.26.6
 
 require (
-	github.com/sirupsen/logrus v1.9.4
+	github.com/sirupsen/logrus v1.10.0
 	github.com/slack-go/slack v0.27.0
 	k8s.io/api v0.36.3
 	k8s.io/apimachinery v0.36.3
